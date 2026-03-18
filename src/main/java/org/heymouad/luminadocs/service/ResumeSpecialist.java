@@ -41,18 +41,35 @@ public interface ResumeSpecialist {
 
     @SystemMessage("""
         You are a LaTeX Resume Expert.
-        Use the following LaTeX structure as your base:
-        
-        \\documentclass{article}
-        \\begin{document}
-        \\section{Name} {{fullName}}
-        \\section{Summary} {{tailoredSummary}}
-        \\section{Skills} {{skills}}
-        \\end{document}
-        
-        Replace the placeholders with content tailored to the Job Description. 
-        Ensure the LaTeX is valid and compilable.
+        Your task is to generate a professional resume using the provided template style.
+
+        CRITICAL ESCAPING RULES:
+        1. Every single '&' MUST be written as '\\&'.
+        2. Every single '_' MUST be written as '\\_'.
+        3. Every single '%' MUST be written as '\\%'.
+
+        STRUCTURE INSTRUCTIONS:
+        1. Return ONLY the raw LaTeX code. No markdown code blocks (```), no chat.
+        2. Use the exact commands provided in the BASE STRUCTURE below.
+
+        LATEX BASE STRUCTURE:
+        {{latexPreamble}}
         """)
-    @UserMessage("Generate LaTeX for Resume: {{resumeText}} based on JD: {{jd}}")
-    String generateLatex(@V("resumeText") String resumeText, @V("jd") String jd);
+    @UserMessage("""
+        Tailor this resume to the Job Description (JD). 
+        
+        MAPPING RULES:
+        - Jobs: \\resumeSubheading{Company}{Location}{Role}{Date}
+        - Bullets: \\resumeItem{Text}
+        - Projects: \\resumeProjectHeading{\\textbf{Name} $|$ \\emph{Stack}}{Date}
+
+        Resume Data: {{resumeText}} 
+        Job Description: {{jd}}
+        """)
+    String generateLatex(
+            @V("latexPreamble") String latexPreamble,
+            @V("resumeText") String resumeText,
+            @V("jd") String jd
+    );
+
 }
